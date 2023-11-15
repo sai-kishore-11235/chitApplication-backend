@@ -12,8 +12,8 @@ const getChits = asyncHandler(async(req, res) => {
 })
 const createChit = asyncHandler(async(req, res) => {
     console.log(req.body)
-    const { name,startDate,amount} = req.body;
-    if(!name || !startDate || !amount){
+    const { name,startDate,amount,paidInstallments} = req.body;
+    if(!name || !startDate || !amount || !paidInstallments){
         res.status(400)
         throw new Error("All fields are mandatory !!")
     }
@@ -23,8 +23,8 @@ const createChit = asyncHandler(async(req, res) => {
         throw new Error("Invalid start date");
       }
       console.log(startDateObj.toDate())
-      const endDateObj = moment().add(10,'months',startDate)
-      const settlementDateObj = moment().add(12,'months',startDate)
+      const endDateObj = moment(startDate).add(9, 'month')
+      const settlementDateObj = moment(startDate).add(11, 'month')
       let totalamount = amount*10;
       let settlementAmount = ((totalamount*0.15)+totalamount)
 
@@ -35,7 +35,8 @@ const createChit = asyncHandler(async(req, res) => {
         amount,
         endDate: endDateObj.toDate(),
         settlementDate: settlementDateObj.toDate(),
-        settlementAmount: settlementAmount
+        settlementAmount: settlementAmount,
+        paidInstallments
     })
     res.status(201).json(chit)
 })
@@ -70,5 +71,16 @@ const deleteChit = asyncHandler(async(req, res) => {
     await Chit.deleteOne({ _id: req.params.id })
     res.status(204).json(chit)
 })
+const getCalculatedChitAmount = asyncHandler(async(req, res) => {
+    let chits = await Chit.find()
+    let totalAmount =0;
+    chits.forEach(element => {
+        if(!(element.paidInstallments.includes(moment().format("MMM"))&& ((element.endDate).month() <= moment().month()))){
+            totalAmount +=element.amount;
+        }
+    });
+    let obj = {"totalAmount" : totalAmount}
+    res.status(200).json(obj);
+})
 
-module.exports = { getChits, createChit, updateChit, getChit, deleteChit };
+module.exports = { getChits, createChit, updateChit, getChit, deleteChit,getCalculatedChitAmount };

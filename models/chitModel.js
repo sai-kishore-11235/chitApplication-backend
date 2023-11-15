@@ -25,6 +25,10 @@ const chitSchema = mongoose.Schema({
         type: Number,
         required: true
     },
+    paidInstallments:{
+        type: [String],
+        required: true
+    },
 
 },
 {
