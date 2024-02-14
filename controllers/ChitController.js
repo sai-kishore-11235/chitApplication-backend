@@ -12,8 +12,8 @@ const getChits = asyncHandler(async(req, res) => {
 })
 const createChit = asyncHandler(async(req, res) => {
     console.log(req.body)
-    const { name,startDate,amount,paidInstallments} = req.body;
-    if(!name || !startDate || !amount || !paidInstallments){
+    const { name,startDate,amount,paidInstallments,sip} = req.body;
+    if(!name || !startDate || !amount || !paidInstallments || !sip){
         res.status(400)
         throw new Error("All fields are mandatory !!")
     }
@@ -36,7 +36,8 @@ const createChit = asyncHandler(async(req, res) => {
         endDate: endDateObj.toDate(),
         settlementDate: settlementDateObj.toDate(),
         settlementAmount: settlementAmount,
-        paidInstallments
+        paidInstallments,
+        sip
     })
     res.status(201).json(chit)
 })
@@ -74,12 +75,24 @@ const deleteChit = asyncHandler(async(req, res) => {
 const getCalculatedChitAmount = asyncHandler(async(req, res) => {
     let chits = await Chit.find()
     let totalAmount =0;
+    let totalSettlementAmount =0;
+    let sip=0;
+    let totalSip=0;
     chits.forEach(element => {
-        if(!(element.paidInstallments.includes(moment().format("MMM"))&& ((element.endDate).month() <= moment().month()))){
-            totalAmount +=element.amount;
+        if(element.sip &&  moment(element.endDate).month()>=  moment().month()){
+            totalSip+= element.sip
         }
+        // if((element.paidInstallments.includes(moment().format("MMM"))&& ((element.endDate).month() <= moment().month()))){
+        //     totalAmount +=element.amount;
+        // }
+        // // console.log(moment(element.settlementDate).month())
+        // // console.log(moment().month())
+        // if((moment(element.settlementDate)).month() <= moment().month() && (element.status =="Not settled")){
+        //     totalSettlementAmount +=element.settlementAmount;
+        // }
     });
-    let obj = {"totalAmount" : totalAmount}
+
+    let obj = {"totalAmount" : totalAmount ,"totalSettlementAmount" : totalSettlementAmount, "totalSip" : totalSip}
     res.status(200).json(obj);
 })
 

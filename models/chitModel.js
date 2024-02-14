@@ -11,7 +11,7 @@ const chitSchema = mongoose.Schema({
     },
     amount:{
         type: Number,
-        required: [true,"Please add the Amoubt"]
+        required: [true,"Please add the Amount"]
     },
     endDate:{
         type: Date,
@@ -28,6 +28,13 @@ const chitSchema = mongoose.Schema({
     paidInstallments:{
         type: [String],
         required: true
+    },
+    status:{
+        type: String,
+    },
+    sip:{
+        type:Number,
+        required:[true, "Please  provide the number of SIP"]
     },
 
 },
